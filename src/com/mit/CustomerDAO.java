@@ -33,6 +33,34 @@ public class CustomerDAO {
 			System.out.println(ex);
 		}
 		return status;
+	}
+	
+	
+	public static int signinCustomer(CustomerBean u) {
+		int status = 0;
+		try {
+			conn = ConnectionProvider.getCon();			
+			PreparedStatement theStatement = null;
+			theStatement = conn.prepareStatement("select * from username2 where username=?");
+			theStatement.setString(1, u.getUsername());
+			ResultSet theResult = theStatement.executeQuery();
+
+			if(theResult.next()) {
+				status = 1;
+			}
+
+			conn.close();
+			
+		} catch (Exception ex) {
+			System.out.println(ex);
+		}
+		return status;
 		
 	}
+	
+	
+	
+	
+	
+	
 }
