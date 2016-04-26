@@ -36,31 +36,27 @@ public class CustomerDAO {
 	}
 	
 	
-	public static int signinCustomer(CustomerBean u) {
+	public static String signinCustomer(CustomerBean u) {
 		int status = 0;
 		try {
 			conn = ConnectionProvider.getCon();			
 			PreparedStatement theStatement = null;
-			theStatement = conn.prepareStatement("select * from username2 where username=?");
+			theStatement = conn.prepareStatement("select * from username2 where username = ?");
 			theStatement.setString(1, u.getUsername());
 			ResultSet theResult = theStatement.executeQuery();
 
 			if(theResult.next()) {
-				status = 1;
+				return theResult.getString("role");
 			}
 
 			conn.close();
-			
+
 		} catch (Exception ex) {
 			System.out.println(ex);
 		}
-		return status;
+		return null;
 		
 	}
-	
-	
-	
-	
 	
 	
 }

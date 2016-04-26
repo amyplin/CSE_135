@@ -12,7 +12,7 @@
 
 
  <div class="title">
-  <h1>The provided name <%= session.getAttribute("username") %> is not known</h1>
+  <h2>The provided name <%= session.getAttribute("username") %> is not known</h2>
   <h2>Please provide an existing username</h2>
 </div>
 

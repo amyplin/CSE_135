@@ -13,10 +13,12 @@
 
 	<%
 		String username = null;
-		int status = CustomerDAO.signinCustomer(obj);
+		String role = CustomerDAO.signinCustomer(obj);
 		username = request.getParameter("username");
 		session.setAttribute("username", username);
-		if (status > 0) {
+		session.setAttribute("role", role);
+		
+		if (!role.equals(null)) {
 			response.sendRedirect("Home.jsp");
 		} else
 			response.sendRedirect("LoginError.jsp");

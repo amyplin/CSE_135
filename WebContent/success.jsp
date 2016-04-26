@@ -16,8 +16,10 @@ int status = CustomerDAO.insertCustomer(obj);
 if (status>0)
 	out.println("You have successfully signed up!");
 else
-	out.println("Insertion fail");
+	out.println("Sign up failed.");
 %>
+
+
 
 
 </body>
