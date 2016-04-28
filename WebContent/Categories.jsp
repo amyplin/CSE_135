@@ -71,10 +71,11 @@
 								response.sendRedirect("Categories.jsp");
 							} else {
 							
-							pstmt = conn.prepareStatement("INSERT INTO categories (name, description) VALUES (?, ?)");
+							pstmt = conn.prepareStatement("INSERT INTO categories (name, description,count) VALUES (?, ?,?)");
 
 							pstmt.setString(1, request.getParameter("name"));
 							pstmt.setString(2, request.getParameter("description"));
+							pstmt.setInt(3, 0);
 
 							int rowCount = pstmt.executeUpdate();
 							conn.commit();
@@ -98,8 +99,6 @@
 							conn.setAutoCommit(false);
 							pstmt = conn.prepareStatement("UPDATE categories SET name=?, description = ? WHERE name = ?");
 							pstmt.setString(1, request.getParameter("name"));
-							System.out.println(request.getParameter("name"));
-							System.out.println(request.getParameter("description"));
 							pstmt.setString(2, request.getParameter("description"));
 							pstmt.setString(3, request.getParameter("origName"));
 							int rowCount = pstmt.executeUpdate();
@@ -137,6 +136,9 @@
 
 					</form>
 
+				<%
+					if (rs.getInt("count") != 0) {
+				%>
 					<form action="Categories.jsp" method="POST">
 						<input type="hidden" name="action" value="delete" /> <input
 							type="hidden" value="<%=rs.getString("name")%>" name="name" />
@@ -145,6 +147,7 @@
 				</tr>
 
 				<%
+					}
 					}
 						// Close the ResultSet
 						rs.close();
