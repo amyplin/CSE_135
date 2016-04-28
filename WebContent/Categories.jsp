@@ -13,12 +13,16 @@
 
 	<%@ page import="java.sql.*"%>
 	<%
+	Connection conn = null;
+	PreparedStatement pstmt = null;
+	ResultSet rs = null;
+	
 		try {
 			// Registering Postgresql JDBC driver
 			Class.forName("org.postgresql.Driver");
 
 			// Open a connection to the database
-			Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5433/postgres", "postgres",
+			conn = DriverManager.getConnection("jdbc:postgresql://localhost:5433/postgres", "postgres",
 					"alin");
 	%>
 
@@ -27,29 +31,63 @@
 	<div class="container">
 		<table class="table table-bordered">
 			<thead>
-				<tr>
+				<tr>				
 					<th>Name</th>
 					<th>Description</th>
-					<th>Buttons</th>
+					<th></th>
 				</tr>
 				<tr>
 					<form action="Categories.jsp" method=”POST">
-						<input type="hidden" name="action" value="insert" />
-						<th><input value="" name="name" size="15" /></th>
-						<th><input value="" name="description" size="15" /></th>
-						<th><input type="submit" value="Insert" /></th>
+						<input type="hidden" name="action" value="insert"autocomplete="off" />
+						<th><input value="" name="name" size="15" autocomplete="off"/></th>
+						<th><input value="" name="description" size="15" autocomplete="off"/></th>
+						<th><input type="submit" value="Insert" autocomplete="off"/></th>
 					</form>
 				</tr>
 
 				<%
 					String action = request.getParameter("action");
-						if (action != null && action.equals("insert")) {
+				
 
-							PreparedStatement pstmt = conn
-									.prepareStatement("INSERT INTO categories (name, description) VALUES (?, ?)");
+						if (action != null && action.equals("insert")) {
+							
+							conn.setAutoCommit(false);
+				
+							pstmt = conn.prepareStatement("INSERT INTO categories (name, description) VALUES (?, ?)");
+
 							pstmt.setString(1, request.getParameter("name"));
 							pstmt.setString(2, request.getParameter("description"));
+
 							int rowCount = pstmt.executeUpdate();
+							conn.commit();
+							conn.setAutoCommit(true);
+
+						}
+
+						// Check if a delete is requested
+						if (action != null && action.equals("delete")) {
+							conn.setAutoCommit(false);
+							pstmt = conn.prepareStatement("DELETE FROM categories WHERE name = ?");
+							pstmt.setString(1, request.getParameter("name"));
+							int rowCount = pstmt.executeUpdate();
+							conn.commit();
+							conn.setAutoCommit(true);
+						}
+
+						// Check if an update is requested
+						if (action != null && action.equals("update")) {
+							
+							conn.setAutoCommit(false);
+							pstmt = conn.prepareStatement("UPDATE categories SET name=?, description = ? WHERE name = ?");
+							pstmt.setString(1, request.getParameter("name"));
+							System.out.println(request.getParameter("name"));
+							System.out.println(request.getParameter("description"));
+							pstmt.setString(2, request.getParameter("description"));
+							pstmt.setString(3, request.getParameter("origName"));
+							int rowCount = pstmt.executeUpdate();
+							
+							conn.commit();
+							conn.setAutoCommit(true);
 						}
 				%>
 
@@ -58,37 +96,48 @@
 
 				<%
 					// Create the statement
-					
-					PreparedStatement pstmt = conn
-									.prepareStatement("select * from categories");
-					ResultSet rs = pstmt.executeQuery();
-/* 					Statement theStatement = conn.createStatement();
-					ResultSet rs = theStatement.executeQuery("select * from categories"); */
-	
+					Statement statement = conn.createStatement();
+					rs = statement.executeQuery("select * from categories");
 				%>
 
 				<%-- Iterate over the ResultSet / Presentation code --%>
 				<%
 					while (rs.next()) {
 				%>
+
 				<tr>
+					<form action="Categories.jsp" method="POST">
+						<input type="hidden" name="action" value="update" />
+						<input type="hidden" name="origName" value=<%=rs.getString("name")%> />
+													
+						<td><input value="<%=rs.getString("name")%>"
+							name="name" size="15" /></td>
+						<td><input value="<%=rs.getString("description")%>"
+							name="description" size="15" /></td>
 
-					<td><%=rs.getString("name")%></td>
-					<td><%=rs.getString("description")%></td>
+					<td><input type="submit" value="Update"></td>
+
+					</form>
+
+					<form action="Categories.jsp" method="POST">
+						<input type="hidden" name="action" value="delete" /> <input
+							type="hidden" value="<%=rs.getString("name")%>" name="name" />
+						<td><input type="submit" value="Delete" /></td>
+					</form>
 				</tr>
-
 
 				<%
 					}
-					// Close the ResultSet
+						// Close the ResultSet
 						rs.close();
-						// Close the Statement
-						/* theStatement.close(); */
-						pstmt.close();
+						statement.close();
 						// Close the Connection
 						conn.close();
-					} catch  (Exception ex) {
-						System.out.println(ex);
+					} catch (SQLException e) {
+
+						// Wrap the SQL exception in a runtime exception to propagate
+						// it upwards
+						throw new RuntimeException(e);
 					}
 				%>
 
