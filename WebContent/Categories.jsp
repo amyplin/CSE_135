@@ -10,6 +10,9 @@
 
 </head>
 <body>
+ <div class="title">
+  <h1>Hello <%= session.getAttribute("username") %></h1>
+</div>
 
 	<%@ page import="java.sql.*"%>
 	<%
@@ -24,24 +27,35 @@
 			// Open a connection to the database
 			conn = DriverManager.getConnection("jdbc:postgresql://localhost:5433/postgres", "postgres",
 					"alin");
+			
 	%>
 
-	<h1>Categories</h1>
+	<h1>Categories</h1><br>
+
+	<%
+		if (session.getAttribute("error").equals("true")) {
+			session.setAttribute("error", "false");
+	%>
+	<h3>Data Modification Failure*</h3><br>
+	
+	<% } %>
 
 	<div class="container">
 		<table class="table table-bordered">
 			<thead>
-				<tr>				
+				<tr>
 					<th>Name</th>
 					<th>Description</th>
 					<th></th>
 				</tr>
 				<tr>
 					<form action="Categories.jsp" method=”POST">
-						<input type="hidden" name="action" value="insert"autocomplete="off" />
-						<th><input value="" name="name" size="15" autocomplete="off"/></th>
-						<th><input value="" name="description" size="15" autocomplete="off"/></th>
-						<th><input type="submit" value="Insert" autocomplete="off"/></th>
+						<input type="hidden" name="action" value="insert"
+							autocomplete="off" />
+						<th><input value="" name="name" size="15" autocomplete="off" /></th>
+						<th><input value="" name="description" size="15"
+							autocomplete="off" /></th>
+						<th><input type="submit" value="Insert" autocomplete="off" /></th>
 					</form>
 				</tr>
 
@@ -52,7 +66,11 @@
 						if (action != null && action.equals("insert")) {
 							
 							conn.setAutoCommit(false);
-				
+							if (request.getParameter("name").equals("") || request.getParameter("description").equals("")) {
+								session.setAttribute("error", "true");
+								response.sendRedirect("Categories.jsp");
+							} else {
+							
 							pstmt = conn.prepareStatement("INSERT INTO categories (name, description) VALUES (?, ?)");
 
 							pstmt.setString(1, request.getParameter("name"));
@@ -61,7 +79,7 @@
 							int rowCount = pstmt.executeUpdate();
 							conn.commit();
 							conn.setAutoCommit(true);
-
+							}
 						}
 
 						// Check if a delete is requested
@@ -107,15 +125,15 @@
 
 				<tr>
 					<form action="Categories.jsp" method="POST">
-						<input type="hidden" name="action" value="update" />
-						<input type="hidden" name="origName" value=<%=rs.getString("name")%> />
-													
-						<td><input value="<%=rs.getString("name")%>"
-							name="name" size="15" /></td>
+						<input type="hidden" name="action" value="update" /> <input
+							type="hidden" name="origName" value=<%=rs.getString("name")%> />
+
+						<td><input value="<%=rs.getString("name")%>" name="name"
+							size="15" /></td>
 						<td><input value="<%=rs.getString("description")%>"
 							name="description" size="15" /></td>
 
-					<td><input type="submit" value="Update"></td>
+						<td><input type="submit" value="Update"></td>
 
 					</form>
 

@@ -19,6 +19,7 @@
 		session.setAttribute("role", role);
 		
 		if (!role.equals(null)) {
+			session.setAttribute("error", "false");
 			response.sendRedirect("Home.jsp");
 		} else
 			response.sendRedirect("LoginError.jsp");
