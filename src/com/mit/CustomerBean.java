@@ -29,6 +29,4 @@ public class CustomerBean {
 	public void setState(String state) {
 		this.state = state;
 	}
-
-	
 }

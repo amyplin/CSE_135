@@ -5,7 +5,7 @@
 <head>
 <title>Hello</title>
 <meta charset="UTF-8">
-<link rel="stylesheet" media="screen" href="css/signup.css">
+<link rel="stylesheet" media="screen" href="css/categories.css">
 <link rel="stylesheet" href="css/bootstrap.min.css">
 
 </head>
@@ -30,7 +30,12 @@
 			
 	%>
 
-	<h1>Categories</h1><br>
+	<h2>Categories</h2>
+	<br>
+	<ul>
+		<li><a href="Categories.jsp">Categories</a></li>
+		<li><a href="#">Products</a></li>
+	</ul>
 
 	<%
 		if (session.getAttribute("error").equals("true")) {
@@ -39,6 +44,8 @@
 	<h3>Data Modification Failure*</h3><br>
 	
 	<% } %>
+	
+	
 
 	<div class="container">
 		<table class="table table-bordered">
@@ -61,25 +68,34 @@
 
 				<%
 					String action = request.getParameter("action");
-				
-
+										
 						if (action != null && action.equals("insert")) {
-							
-							conn.setAutoCommit(false);
-							if (request.getParameter("name").equals("") || request.getParameter("description").equals("")) {
+							PreparedStatement pstmtCheck = null;
+							pstmtCheck = conn.prepareStatement("select * from username2 where username=?");
+							pstmtCheck.setString(1, request.getParameter("name"));
+							ResultSet theResult = pstmtCheck.executeQuery();
+System.out.println("hello");
+							if (theResult.next()) {
+								System.out.println("duplicate");
+								session.setAttribute("error", "true");
+								response.sendRedirect("Categories.jsp");
+							} else if (request.getParameter("name").equals("")
+									|| request.getParameter("description").equals("")) {
 								session.setAttribute("error", "true");
 								response.sendRedirect("Categories.jsp");
 							} else {
-							
-							pstmt = conn.prepareStatement("INSERT INTO categories (name, description,count) VALUES (?, ?,?)");
+								conn.setAutoCommit(false);
+								pstmt = conn
+										.prepareStatement("INSERT INTO categories (name, description,count) VALUES (?, ?,?)");
 
-							pstmt.setString(1, request.getParameter("name"));
-							pstmt.setString(2, request.getParameter("description"));
-							pstmt.setInt(3, 0);
+								pstmt.setString(1, request.getParameter("name"));
+								pstmt.setString(2, request.getParameter("description"));
+								pstmt.setInt(3, 0);
 
-							int rowCount = pstmt.executeUpdate();
-							conn.commit();
-							conn.setAutoCommit(true);
+								int rowCount = pstmt.executeUpdate();
+								conn.commit();
+								conn.setAutoCommit(true);
+
 							}
 						}
 
@@ -95,14 +111,14 @@
 
 						// Check if an update is requested
 						if (action != null && action.equals("update")) {
-							
+
 							conn.setAutoCommit(false);
 							pstmt = conn.prepareStatement("UPDATE categories SET name=?, description = ? WHERE name = ?");
 							pstmt.setString(1, request.getParameter("name"));
 							pstmt.setString(2, request.getParameter("description"));
 							pstmt.setString(3, request.getParameter("origName"));
 							int rowCount = pstmt.executeUpdate();
-							
+
 							conn.commit();
 							conn.setAutoCommit(true);
 						}
@@ -137,7 +153,7 @@
 					</form>
 
 				<%
-					if (rs.getInt("count") != 0) {
+					if (rs.getInt("count") <= 0) {
 				%>
 					<form action="Categories.jsp" method="POST">
 						<input type="hidden" name="action" value="delete" /> <input
