@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Context path="" debug="5" override="true" reloadable="true">
+<Resource
+
+	name="jdbc/ClassesDBPool"
+	description="CSE Classes DB Pool"
+	driverClassName="org.postgresql.Driver"
+	type="javax.sql.DataSource" auth="Container"
+	url="jdbc:postgresql://localhost:5433/postgres?autoReconnectForPools=true"
+	username="postgres" password="alin"
+	defaultAutoCommit="false"
+	maxActive="10" minIdle="0" maxIdle="5" maxWait="3000"
+	removeAbandoned="true" removeAbandonedTimeout="60"
+	logAbandoned="true" validationQuery="Select 1"
+/>
+<ResourceLink name="jdbc/mydb"
+             global="jdbc/mydb"
+              type="javax.sql.DataSource" />
+</Context>
+

@@ -18,7 +18,7 @@
 		session.setAttribute("username", username);
 		session.setAttribute("role", role);
 		
-		if (!role.equals(null)) {
+		if (role !=null &&  !role.isEmpty()) {
 			session.setAttribute("error", "false");
 			response.sendRedirect("Home.jsp");
 		} else

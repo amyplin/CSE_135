@@ -1,5 +1,6 @@
 package com.mit;
 import java.sql.*;
+import java.util.*;
 public class CustomerDAO {
 	static Connection conn;
 	static PreparedStatement pst;

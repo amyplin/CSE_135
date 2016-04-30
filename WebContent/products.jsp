@@ -18,9 +18,7 @@
 			Class.forName("org.postgresql.Driver");
 
 			// Open a connection to the database
-			Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/db_135", "postgres",
-					"password");
-			
+			Connection conn = ConnectionProvider.getCon();
 	%>
 
 	<h1>Products</h1>
