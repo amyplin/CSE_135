@@ -8,24 +8,8 @@
 <link rel="stylesheet" media="screen" href="css/categories.css">
 <link rel="stylesheet" href="css/bootstrap.min.css">
 
-<?xml version="1.0" encoding="UTF-8"?>
-<Context path="" debug="5" override="true" reloadable="true">
-<Resource
-
-	name="jdbc/ClassesDBPool"
-	description="CSE Classes DB Pool"
-	driverClassName="org.postgresql.Driver"
-	type="javax.sql.DataSource" auth="Container"
-	url="jdbc:postgresql://localhost:5433/postgres?autoReconnectForPools=true"
-	username="postgres" password="alin"
-	defaultAutoCommit="false"
-	maxActive="10" minIdle="0" maxIdle="5" maxWait="3000"
-	removeAbandoned="true" removeAbandonedTimeout="60"
-	logAbandoned="true" validationQuery="Select 1"
-/>
-</Context>
-
-
+<jsp:useBean id="obj" class="com.mit.CategoryBean"/>
+<jsp:setProperty property="*" name="obj"/>
 
 </head>
 <body>
@@ -61,7 +45,6 @@
 	</ul>
 <% 
 
-
 		if (session.getAttribute("error").equals("true")) {
 			session.setAttribute("error", "false");
 	%>
@@ -92,57 +75,43 @@
 
 				<%
 					String action = request.getParameter("action");
-					PreparedStatement theStatement = null;
-						
-								if (action != null && action.equals("insert")) {
-									if (request.getParameter("name").equals("") || request.getParameter("description").equals("")) {
-										session.setAttribute("error", "true");
-										response.sendRedirect("Categories.jsp");
-									} else {
+						PreparedStatement theStatement = null;
 
-										theStatement = conn.prepareStatement("select * from categories where name = ?");
-										theStatement.setString(1, request.getParameter("name"));
-										ResultSet theResult = theStatement.executeQuery();
+						if (action != null && action.equals("insert")) {
 
-										if(theResult.next()) {
-											session.setAttribute("error", "true");
-											response.sendRedirect("Categories.jsp");
-										} else {
+							if (request.getParameter("name").equals("") || request.getParameter("description").equals("")) {
+								session.setAttribute("error", "true");
+								response.sendRedirect("Categories.jsp");
+							} else {
 
-										conn.setAutoCommit(false);
-										pstmt = conn
-												.prepareStatement("INSERT INTO categories (name, description,count) VALUES (?, ?,?)");
+								theStatement = conn.prepareStatement("select * from categories where name = ?");
+								theStatement.setString(1, request.getParameter("name"));
+								ResultSet theResult = theStatement.executeQuery();
 
-										pstmt.setString(1, request.getParameter("name"));
-										pstmt.setString(2, request.getParameter("description"));
-										pstmt.setInt(3, 0);
+								if (theResult.next()) {
+									session.setAttribute("error", "true");
+									response.sendRedirect("Categories.jsp");
+								} else {
 
-										int rowCount = pstmt.executeUpdate();
-										conn.commit();
-										conn.setAutoCommit(true);
-										}
-									}
+									CustomerDAO.insertCategory(obj);
 								}
-
-								// Check if a delete is requested
-								if (action != null && action.equals("delete")) {
-									
-									theStatement = conn.prepareStatement("select * from categories where name = ?");
-									theStatement.setString(1, request.getParameter("name"));
-									ResultSet theResult = theStatement.executeQuery();
-
-									if(!theResult.next()) {
-										session.setAttribute("error", "true");
-										response.sendRedirect("Categories.jsp");
-									} else {
-									conn.setAutoCommit(false);
-									pstmt = conn.prepareStatement("DELETE FROM categories WHERE name = ?");
-									pstmt.setString(1, request.getParameter("name"));
-									int rowCount = pstmt.executeUpdate();
-									conn.commit();
-									conn.setAutoCommit(true);
-									}
 							}
+						}
+
+						// Check if a delete is requested
+						if (action != null && action.equals("delete")) {
+
+							theStatement = conn.prepareStatement("select * from categories where name = ?");
+							theStatement.setString(1, request.getParameter("name"));
+							ResultSet theResult = theStatement.executeQuery();
+
+							if (!theResult.next()) {
+								session.setAttribute("error", "true");
+								response.sendRedirect("Categories.jsp");
+							} else {
+								CustomerDAO.deleteCategory(obj);
+							}
+						}
 
 						// Check if an update is requested
 						if (action != null && action.equals("update")) {
@@ -157,18 +126,8 @@
 								if (!theResult.next()) { //update but no longer available
 									session.setAttribute("error", "true");
 									response.sendRedirect("Categories.jsp");
-									System.out.println("update here");
 								} else {
-									conn.setAutoCommit(false);
-									pstmt = conn
-											.prepareStatement("UPDATE categories SET name=?, description = ? WHERE name = ?");
-									pstmt.setString(1, request.getParameter("name"));
-									pstmt.setString(2, request.getParameter("description"));
-									pstmt.setString(3, request.getParameter("origName"));
-									int rowCount = pstmt.executeUpdate();
-
-									conn.commit();
-									conn.setAutoCommit(true);
+									CustomerDAO.updateCategory(obj, request.getParameter("origName"));
 								}
 							}
 						}

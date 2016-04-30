@@ -59,6 +59,60 @@ public class CustomerDAO {
 		
 	}
 
+	
+	public static void insertCategory(CategoryBean u) {
+		try {
+			PreparedStatement pstmt = null;
+			conn.setAutoCommit(false);
+			pstmt = conn
+					.prepareStatement("INSERT INTO categories (name, description,count) VALUES (?, ?,?)");
+
+			pstmt.setString(1, u.getName());
+			pstmt.setString(2, u.getDescription());
+			pstmt.setInt(3, 0);
+
+			int rowCount = pstmt.executeUpdate();
+			conn.commit();
+			conn.setAutoCommit(true);
+			
+		} catch (Exception e) {
+			System.out.println("Insertion Failure");
+		}
+		
+	}
+	
+	public static void deleteCategory(CategoryBean u) {
+		try {
+			PreparedStatement pstmt = null;
+			conn.setAutoCommit(false);
+			pstmt = conn.prepareStatement("DELETE FROM categories WHERE name = ?");
+			pstmt.setString(1, u.getName());
+			int rowCount = pstmt.executeUpdate();
+			conn.commit();
+			conn.setAutoCommit(true);
+		} catch (Exception e) {
+			System.out.println("Deletion Failure");
+		}
+	}
+	
+	public static void updateCategory(CategoryBean u, String origName) {
+		try {
+			PreparedStatement pstmt = null;
+			conn.setAutoCommit(false);
+			pstmt = conn
+					.prepareStatement("UPDATE categories SET name=?, description = ? WHERE name = ?");
+			pstmt.setString(1, u.getName());
+			pstmt.setString(2, u.getDescription());
+			pstmt.setString(3, origName);
+			int rowCount = pstmt.executeUpdate();
+
+			conn.commit();
+			conn.setAutoCommit(true);
+		} catch (Exception e) {
+			System.out.println("Update Failure");
+		}
+	}
+	
 	public static ArrayList<String> insertProduct(ProductBean u) {
 		ArrayList<String> error = new ArrayList<String>();
 		
