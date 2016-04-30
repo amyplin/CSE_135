@@ -23,7 +23,7 @@
 
 
  <div class="title">
-  <h1><%= session.getAttribute("username") %>'s Shopping Cart</h1>
+  <h1>Hello <%= session.getAttribute("username") %>, This Is Your Shopping Cart</h1>
 </div>
 
 
@@ -33,8 +33,8 @@
 				<tr>
 					<th>Item</th>
 					<th>Description</th>
-					<th>Price</th>
 					<th>Quantity</th>
+					<th>Price</th>
 					
 				</tr>
 				
@@ -43,24 +43,30 @@
 			<tbody>
 				<%
 				// Create the statement
-				PreparedStatement cartSQL = conn.prepareStatement("select * from shoppingcart where username=?");
+				PreparedStatement cartSQL = conn.prepareStatement("select * from shoppingcart join products on shoppingcart.sku = products.sku where username=?");
 				cartSQL.setString(1, session.getAttribute("username").toString());
 				ResultSet rs = cartSQL.executeQuery();
 				%>
 				
 				<%-- Iterate over the ResultSet / Presentation code --%>
-				<%
+				<%		
+						int shoppingcarttotal = 0;
 						while (rs.next()) {
 				%>
-				<tr>
-					<td><%=rs.getString("username")%></td>
-					<td><%=rs.getString("sku")%></td>
-					<td><%=rs.getString("quantity")%></td>
-					<td>N/A</td>
-				</tr>
+					<tr>
+						<td><%=rs.getString("name")%></td>
+						<td><%=rs.getString("sku")%></td>
+						<td><%=rs.getString("quantity")%></td>
+						<td><%=rs.getString("price") %>$</td>
+					</tr>
 
 
 				<%
+							// calculate the total price
+							int quantity = Integer.parseInt(rs.getString("quantity"));
+							int price = Integer.parseInt(rs.getString("price"));
+							shoppingcarttotal += (quantity*price);
+							
 						}
 						// Close the ResultSet
 						rs.close();
@@ -70,14 +76,17 @@
 						conn.close();
 						
 						
-					} catch  (Exception ex) {
-						System.out.println(ex);
-					}
+
 					
 				%>
 			</tbody>
 		</table>
 	</div>
+	<p> Shopping Cart Total: <% out.print(shoppingcarttotal); %>$</p>
+	
+	<%					} catch  (Exception ex) {
+							System.out.println(ex);
+						} %>
 
 </body>
 </html>
