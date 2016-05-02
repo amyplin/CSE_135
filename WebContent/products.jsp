@@ -18,7 +18,7 @@
 			Class.forName("org.postgresql.Driver");
 
 			// Open a connection to the database
-			Connection conn = ConnectionProvider.getCon();
+			Connection conn = ConnectionProvider.getCon();		
 	%>
 
 	<h1>Products</h1>
@@ -34,7 +34,7 @@
 				<%
 					// Create the statement
 					
-					PreparedStatement categories_stmt = conn.prepareStatement("SELECT * FROM categories");
+					PreparedStatement categories_stmt = conn.prepareStatement("SELECT * FROM categories ORDER BY name");
 					ResultSet categories_rs = categories_stmt.executeQuery();
 				%>
 
@@ -62,7 +62,12 @@
 				%>
 				<tr>
 					<td>
-					<a href="products.jsp?category_search=all">
+					<a href="products.jsp?category_search=all
+					<%
+					if (request.getParameter("filter") != null)
+						out.print("&filter=" + request.getParameter("filter"));
+					%>
+					">
 					All
 					</a>
 					</td>
@@ -94,10 +99,12 @@
 					<%
 					//get categories
 					categories_rs = categories_stmt.executeQuery();
-					String ret_url = request.getRequestURL() + "?" + request.getQueryString();
+					String ret_url = request.getRequestURL() + "";
+					ret_url += (request.getQueryString() != null)? "?" + request.getQueryString():"";
 					%>
 				
-					<form action="insert_product.jsp" method="POST">
+					<form action="modify_product.jsp" method="POST">
+						<input type="hidden" name="mod" value="insert"/>
 						<input type="hidden" name="ret_url" value="<%out.print(ret_url);%>" />
 						<th><input value="" id="name" name="name" size="15" /></th>
 						<th><input value="" id="sku" name="sku" size="15" /></th>
@@ -115,7 +122,7 @@
 						</select>
 						</th>
 						<th><input value="" id="price" name="price" size="15" /></th>
-						<th><input type="submit" value="Insert" /></th>
+						<th><input name="action" type="submit" value="Insert" /></th>
 					</form>
 				</tr>
 			</thead>
@@ -134,6 +141,7 @@
 						products_sql += ((category_param == null || "all".equals(category_param)) && filter_param != null)
 										?" WHERE ":"";
 						products_sql += (filter_param != null)?" name LIKE '%" + filter_param + "%' ":"";
+						products_sql += " ORDER BY sku";
 						PreparedStatement pstmt = conn.prepareStatement(products_sql);
 						ResultSet rs = pstmt.executeQuery();
 					
@@ -145,10 +153,17 @@
 						while (rs.next()) {
 				%>
 				<tr>
-					<td><%=rs.getString("name")%></td>
-					<td><%=rs.getString("sku")%></td>
-					<td><%=rs.getString("category")%></td>
-					<td><%=rs.getString("price")%></td>
+					<form action="modify_product.jsp" method="POST">
+						<input type="hidden" name="mod" value="update"/>
+						<input type="hidden" name="ret_url" value="<%out.print(ret_url);%>" />
+						<input type="hidden" name="sku_id" value="<%out.print(rs.getString("sku"));%>"/>
+						<th><input value="<%=rs.getString("name")%>" name="name"/></th>
+						<th><input value="<%=rs.getString("sku")%>" name="sku"/></th>
+						<th><input value="<%=rs.getString("category")%>" name="category"/></th>
+						<th><input value="<%=rs.getString("price")%>" name="price"/></th>
+						<th><input type="submit" name="action" value="Update" /></th>
+						<th><input type="submit" name="action" value="Delete" /></th>
+					</form>
 				</tr>
 
 
@@ -179,7 +194,6 @@ if (error == null)
 	error = new ArrayList<String>();
 	
 if (!(error.isEmpty())) {
-	out.println("<li>Failure to insert product</li>");
 	for (String s : error) {
 		out.println("<li>" + s + "</li>");
 	}
