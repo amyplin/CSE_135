@@ -118,7 +118,7 @@ public class CustomerDAO {
 		}
 	}
 	
-	public static ArrayList<String> insertProduct(ProductBean u) {
+		public static ArrayList<String> insertProduct(ProductBean u) {
 		ArrayList<String> error = new ArrayList<String>();
 		
 		try {
@@ -128,6 +128,68 @@ public class CustomerDAO {
 				error.add("Please fill out all fields");
 				
 			if (u.getSku() != "") {
+				PreparedStatement check_sku = conn.prepareStatement("SELECT * FROM products WHERE sku='"
+																	+ u.getSku() +"'");
+				
+				ResultSet rs_sku = check_sku.executeQuery();
+				if (rs_sku.next()) 
+					error.add("SKU id taken");
+			}
+			
+			if (u.getCategory() != "") {
+				PreparedStatement check_sku = conn.prepareStatement("SELECT * FROM categories WHERE name='"
+																	+ u.getCategory() +"'");
+			
+				ResultSet rs_sku = check_sku.executeQuery();
+				if (!rs_sku.next()) 
+					error.add("Category does not exist");
+				
+				check_sku.close();
+				rs_sku.close();
+			}
+			
+			int price = 0;
+			try {
+				price = Integer.parseInt(u.getPrice());
+				if (price < 0)
+					error.add("Invalid price");
+			} catch(Exception e) {
+				error.add("Invalid price");
+			}
+			
+			if (error.isEmpty()) {
+				PreparedStatement pstmt = conn.prepareStatement("INSERT INTO products (name,sku,category,price)" +
+							  									"VALUES (?,?,?,?)");
+				pstmt.setString(1, u.getName());
+				pstmt.setString(2, u.getSku());
+				pstmt.setString(3, u.getCategory());
+				pstmt.setInt(4, price);
+				pstmt.executeUpdate();
+				
+				pstmt = conn.prepareStatement("UPDATE categories SET count=count+1 WHERE name=?");
+				pstmt.setString(1, u.getCategory());
+				pstmt.executeUpdate();
+				
+				pstmt.close();
+			}
+			
+			conn.close();
+		} catch (Exception e) {
+			error.add("Insertion Failure");
+		}
+		
+		return error;
+	}
+	
+	public static ArrayList<String> updateProduct(ProductBean u, String sku) {
+		ArrayList<String> error = new ArrayList<String>();
+		try {
+			conn = ConnectionProvider.getCon();
+			
+			if (u.getName() == "" || u.getSku() == "" || u.getCategory() == "" || u.getPrice() == "") 
+				error.add("Please fill out all fields");
+				
+			if (u.getSku() != "" && !sku.equals(u.getSku())) {
 				PreparedStatement check_sku = conn.prepareStatement("SELECT * FROM products WHERE sku='"
 																	+ u.getSku() +"'");
 				
@@ -155,23 +217,43 @@ public class CustomerDAO {
 			}
 			
 			if (error.isEmpty()) {
-				PreparedStatement pstmt = conn.prepareStatement("INSERT INTO products (name,sku,category,price)" +
-							  									"VALUES (?,?,?,?)");
+				PreparedStatement pstmt = conn.prepareStatement("UPDATE products SET name=?,sku=?,category=?,price=?" +
+							  									"WHERE sku=?");
 				pstmt.setString(1, u.getName());
 				pstmt.setString(2, u.getSku());
 				pstmt.setString(3, u.getCategory());
 				pstmt.setInt(4, price);
-				
+				pstmt.setString(5,sku);
 				pstmt.executeUpdate();
 			}
 			
 			conn.close();
 		} catch (Exception e) {
-			error.add("Insertion Failure");
+			error.add("Update Failure");
 		}
 		
 		return error;
 	}
 	
-	
+	public static ArrayList<String> deleteProduct(String sku, String category) {
+		ArrayList<String> error = new ArrayList<String>();
+		
+		try {
+			conn = ConnectionProvider.getCon();
+			PreparedStatement pstmt = conn.prepareStatement("DELETE FROM products WHERE sku=?");
+			pstmt.setString(1, sku);
+			pstmt.executeUpdate();
+			
+			pstmt = conn.prepareStatement("UPDATE categories SET count=count-1 WHERE name=?");
+			pstmt.setString(1, category);
+			pstmt.executeUpdate();
+			
+			pstmt.close();
+			conn.close();
+		} catch (Exception e) {
+			error.add("Failure to delete");
+		}
+		
+		return error;
+	}
 }
