@@ -11,27 +11,32 @@
 <jsp:useBean id="obj" class="com.mit.CustomerBean"/>
 <jsp:setProperty property="*" name="obj"/>
 
-
+<% if (session.getAttribute("loggedIn") == null) { %>
+<div class="title">
+	<h1>No user logged in</h1>
+</div>
+<% } else { %>
  <div class="title">
   <h1>Hello <%= session.getAttribute("username") %></h1>
 </div>
+<% } %>
 
- <% 
+<%--  <% 
 	if (session.getAttribute("role").equals("Owner")) {
-%>
+%> --%>
 
 <ul>
     <li><a href="Categories.jsp">Categories</a></li>
-    <li><a href="#">Products</a></li>
+    <li><a href="products.jsp">Products</a></li>
 </ul>
 
-<% } else { %>
+<%-- <% } else { %>
 
 <ul>
     <li><a href="#">Product Browsing</a></li>
 </ul>
 
-<% } %>
+<% } %> --%>
 
 </body>
 </html>

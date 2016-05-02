@@ -9,6 +9,8 @@ public class CustomerDAO {
 		int status = 0;
 		try {
 			conn = ConnectionProvider.getCon();
+			conn.setAutoCommit(false);
+			
 			if (u.getUsername().equals("") || u.getRole().equals("") || 
 					u.getAge().equals("") || u.getState().equals("")) {
 				return status;
@@ -20,14 +22,15 @@ public class CustomerDAO {
 
                 if(theResult.next())
                     return status;
-				
-				
+								
 				pst = conn.prepareStatement("insert into username2 values(?,?,?,?)");
 				pst.setString(1, u.getUsername());
 				pst.setString(2, u.getRole());
 				pst.setString(3, u.getAge());
 				pst.setString(4, u.getState());
 				status = pst.executeUpdate();
+				conn.commit();
+				conn.setAutoCommit(true);
 				conn.close();
 			}
 		} catch (Exception ex) {
@@ -49,7 +52,6 @@ public class CustomerDAO {
 			if(theResult.next()) {
 				return theResult.getString("role");
 			}
-
 			conn.close();
 
 		} catch (Exception ex) {
@@ -74,24 +76,27 @@ public class CustomerDAO {
 			int rowCount = pstmt.executeUpdate();
 			conn.commit();
 			conn.setAutoCommit(true);
-			
 		} catch (Exception e) {
-			System.out.println("Insertion Failure");
+			System.out.println(e);
 		}
 		
 	}
 	
 	public static void deleteCategory(CategoryBean u) {
+		Savepoint savepoint = null;
 		try {
 			PreparedStatement pstmt = null;
 			conn.setAutoCommit(false);
 			pstmt = conn.prepareStatement("DELETE FROM categories WHERE name = ?");
 			pstmt.setString(1, u.getName());
 			int rowCount = pstmt.executeUpdate();
+			savepoint = conn.setSavepoint();
+
 			conn.commit();
 			conn.setAutoCommit(true);
 		} catch (Exception e) {
-			System.out.println("Deletion Failure");
+			System.out.println(e);
+
 		}
 	}
 	
@@ -109,7 +114,7 @@ public class CustomerDAO {
 			conn.commit();
 			conn.setAutoCommit(true);
 		} catch (Exception e) {
-			System.out.println("Update Failure");
+			System.out.println(e);
 		}
 	}
 	

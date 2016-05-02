@@ -18,8 +18,9 @@
 		session.setAttribute("username", username);
 		session.setAttribute("role", role);
 		
-		if (role !=null &&  !role.isEmpty()) {
+		if (role !=null && !role.isEmpty()) {
 			session.setAttribute("error", "false");
+			session.setAttribute("loggedIn", "true");
 			response.sendRedirect("Home.jsp");
 		} else
 			response.sendRedirect("LoginError.jsp");

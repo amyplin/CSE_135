@@ -13,9 +13,18 @@
 
 </head>
 <body>
+
+
+<% if (session.getAttribute("loggedIn") == null) { %>
+<div class="title">
+	<h1>No user logged in</h1>
+</div>
+<% } else { %>
  <div class="title">
   <h1>Hello <%= session.getAttribute("username") %></h1>
 </div>
+
+
 
 	<%@ page import="java.sql.*, javax.sql.*, javax.naming.*"%>
 	<%
@@ -41,7 +50,7 @@
 	<br>
 	<ul>
 		<li><a href="Categories.jsp">Categories</a></li>
-		<li><a href="#">Products</a></li>
+		<li><a href="products.jsp">Products</a></li>
 	</ul>
 <% 
 
@@ -75,62 +84,72 @@
 
 				<%
 					String action = request.getParameter("action");
-						PreparedStatement theStatement = null;
+										PreparedStatement theStatement = null;
 
-						if (action != null && action.equals("insert")) {
+										if (action != null && action.equals("insert")) {
 
-							if (request.getParameter("name").equals("") || request.getParameter("description").equals("")) {
-								session.setAttribute("error", "true");
-								response.sendRedirect("Categories.jsp");
-							} else {
+											if (request.getParameter("name").equals("") || request.getParameter("description").equals("")) {
+												session.setAttribute("error", "true");
+												response.sendRedirect("Categories.jsp");
+											} else {
 
-								theStatement = conn.prepareStatement("select * from categories where name = ?");
-								theStatement.setString(1, request.getParameter("name"));
-								ResultSet theResult = theStatement.executeQuery();
+												theStatement = conn.prepareStatement("select * from categories where name = ?");
+												theStatement.setString(1, request.getParameter("name"));
+												ResultSet theResult = theStatement.executeQuery();
 
-								if (theResult.next()) {
-									session.setAttribute("error", "true");
+												if (theResult.next()) {
+													session.setAttribute("error", "true");
+													response.sendRedirect("Categories.jsp");
+												} else {
+
+													CustomerDAO.insertCategory(obj);
+												}
+											}
+										}
+
+										// Check if a delete is requested
+										if (action != null && action.equals("delete")) {
+
+											theStatement = conn.prepareStatement("select * from categories where name = ?");
+											theStatement.setString(1, request.getParameter("name"));
+											ResultSet theResult = theStatement.executeQuery();
+
+											if (!theResult.next() || theResult.getInt("count") != 0) {
+												session.setAttribute("error", "true");
+												response.sendRedirect("Categories.jsp");
+											} else {
+												CustomerDAO.deleteCategory(obj);
+											}
+										}
+
+										// Check if an update is requested
+										if (action != null && action.equals("update")) {
+											
+											if (request.getParameter("name").equals("") || request.getParameter("description").equals("")) {
+												session.setAttribute("error", "true");
 									response.sendRedirect("Categories.jsp");
 								} else {
+									if (!request.getParameter("origName").equals(request.getParameter("name"))) { //if updating name
+										//check if cateogry still exists
+										theStatement = conn.prepareStatement("select * from categories where name = ?");
+										theStatement.setString(1, request.getParameter("origName"));
+										ResultSet theResult = theStatement.executeQuery();
 
-									CustomerDAO.insertCategory(obj);
-								}
-							}
-						}
+										//check if name is still unique
+										theStatement = conn.prepareStatement("select * from categories where name = ?");
+										theStatement.setString(1, request.getParameter("name"));
+										ResultSet rs2 = theStatement.executeQuery();
 
-						// Check if a delete is requested
-						if (action != null && action.equals("delete")) {
-
-							theStatement = conn.prepareStatement("select * from categories where name = ?");
-							theStatement.setString(1, request.getParameter("name"));
-							ResultSet theResult = theStatement.executeQuery();
-
-							if (!theResult.next()) {
-								session.setAttribute("error", "true");
-								response.sendRedirect("Categories.jsp");
-							} else {
-								CustomerDAO.deleteCategory(obj);
-							}
-						}
-
-						// Check if an update is requested
-						if (action != null && action.equals("update")) {
-							if (request.getParameter("name").equals("") || request.getParameter("description").equals("")) {
-								session.setAttribute("error", "true");
-								response.sendRedirect("Categories.jsp");
-							} else {
-								theStatement = conn.prepareStatement("select * from categories where name = ?");
-								theStatement.setString(1, request.getParameter("origName"));
-								ResultSet theResult = theStatement.executeQuery();
-
-								if (!theResult.next()) { //update but no longer available
-									session.setAttribute("error", "true");
-									response.sendRedirect("Categories.jsp");
-								} else {
+										if (!theResult.next() || rs2.next()) { //update but no longer available
+											session.setAttribute("error", "true");
+											response.sendRedirect("Categories.jsp");
+										} else {
+											CustomerDAO.updateCategory(obj, request.getParameter("origName"));
+										}
+									}
 									CustomerDAO.updateCategory(obj, request.getParameter("origName"));
 								}
 							}
-						}
 				%>
 
 			</thead>
@@ -192,7 +211,7 @@
 	</div>
 
 
-
+<% } %>
 
 </body>
 </html>
