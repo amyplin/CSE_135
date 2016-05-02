@@ -256,4 +256,23 @@ public class CustomerDAO {
 		
 		return error;
 	}
+	
+	public static String addToCart(String username, int quantity, String sku) {
+		try {
+			conn = ConnectionProvider.getCon();
+			PreparedStatement pstmt = conn.prepareStatement("INSERT INTO shoppingcart VALUES (?,?,?)");
+			pstmt.setString(1, username);
+			pstmt.setInt(2, quantity);
+			pstmt.setString(3, sku);
+			
+			pstmt.executeUpdate();
+			
+			pstmt.close();
+			conn.close();
+		} catch (Exception e) {
+			System.out.println(e);
+			return "Failed to add to shopping cart. Please try again";
+		}
+		return "";
+	}
 }

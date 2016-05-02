@@ -72,7 +72,7 @@
 					<th></th>
 				</tr>
 				<tr>
-					<form action="Categories.jsp" method=”POST">
+					<form action="Categories.jsp" method="POST">
 						<input type="hidden" name="action" value="insert"
 							autocomplete="off" />
 						<th><input value="" name="name" size="15" autocomplete="off" /></th>
