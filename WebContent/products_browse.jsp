@@ -128,6 +128,7 @@
 					<th><%=rs.getString("category")%></th>
 					<th><%=rs.getString("price")%></th>
 					<form action="product_order.jsp" method="POST">
+					<input type="hidden" name="url" value="valid" />
 					<input type="hidden" name="sku" value"<%=rs.getString("sku")%>"/>
 					<th><input type="submit" name="action" value="order" /></th>
 					</form>
