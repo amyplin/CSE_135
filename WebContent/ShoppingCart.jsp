@@ -86,9 +86,32 @@
 		<p> Shopping Cart Total: <% out.print(shoppingcarttotal); %>$</p>
 	</div>
 	
+	<br>
+	<br>
+	<br>
+	<div align="center">
+	
+		<% 
+		String error = request.getParameter("error");
+		if( error == null)
+			error = "";
+		%>
+		<p> <%= error %> </p>
+	</div>
+	
+	<div style="width:200px;align:center;" align="center" >
+		<form action="ShoppingCartCheckout.jsp" method="POST">
+			<input class="form-control" id="creditcard" name="creditcard" placeholder="1234 5678 8888" >
+			<input type="hidden" name="sku" value="<%out.print(session.getAttribute("username"));%>" />
+			<button type="submit" class="btn btn-default">Purchase</button>
+		</form>
+	</div>
+	
 	<%					} catch  (Exception ex) {
 							System.out.println(ex);
 						} %>
+						
+						
 
 </body>
 </html>

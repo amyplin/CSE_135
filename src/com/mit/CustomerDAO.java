@@ -260,18 +260,95 @@ public class CustomerDAO {
 	public static String addToCart(String username, int quantity, String sku) {
 		try {
 			conn = ConnectionProvider.getCon();
-			PreparedStatement pstmt = conn.prepareStatement("INSERT INTO shoppingcart VALUES (?,?,?)");
-			pstmt.setString(1, username);
-			pstmt.setInt(2, quantity);
-			pstmt.setString(3, sku);
 			
-			pstmt.executeUpdate();
+			//start transaction
+			conn.setAutoCommit(false);
+			PreparedStatement stmt = conn.prepareStatement("SELECT quantity FROM shoppingcart WHERE username = ?" +
+					"AND sku = ?" );
+			stmt.setString(1, username);
+			stmt.setString(2, sku);
+			ResultSet rset = stmt.executeQuery();
 			
-			pstmt.close();
+			if(rset.next())
+			{
+				int current_quantity = rset.getInt(1); //the current quantity
+				quantity += current_quantity;
+				
+				PreparedStatement updatestmt = conn.prepareStatement("UPDATE shoppingcart SET quantity = ? WHERE username = ? AND sku = ?");
+				updatestmt.setInt(1, quantity);
+				updatestmt.setString(2, username);
+				updatestmt.setString(3, sku);
+				
+				updatestmt.executeUpdate();
+				updatestmt.close();
+				
+				
+			} else {
+			
+				PreparedStatement pstmt = conn.prepareStatement("INSERT INTO shoppingcart VALUES (?,?,?)");
+				pstmt.setString(1, username);
+				pstmt.setInt(2, quantity);
+				pstmt.setString(3, sku);
+				
+				pstmt.executeUpdate();
+				pstmt.close();
+			}
+			
+			stmt.close();
+			conn.commit();
 			conn.close();
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			System.out.println(e);
+			if(conn != null){
+				try{
+					conn.rollback();
+				} catch(SQLException e2) {
+					System.out.println(e2);
+				}
+			}
 			return "Failed to add to shopping cart. Please try again";
+		} finally {
+			try{
+				conn.setAutoCommit(true);
+			} catch (SQLException e) {
+				System.out.println(e);
+				
+			}
+		}
+		return "";
+	}
+	
+	public static String checkout(String username, String creditcard) {
+		try{
+			conn = ConnectionProvider.getCon();
+			// start transaction
+			conn.setAutoCommit(false);
+			
+			// get current date
+			
+			// add to orders relation
+			
+			// remove from shopping cart
+			
+			conn.commit();
+			conn.close();
+		} catch (SQLException ex) {
+			System.out.println(ex);
+			if(conn != null){
+				try{
+					conn.rollback();
+				} catch(SQLException e2) {
+					System.out.println(e2);
+				}
+			}
+			return "Failed to checkout. Please try again";
+		} finally {
+			try{
+				conn.setAutoCommit(true);
+			} catch (SQLException e) {
+				System.out.println(e);
+				
+			}
 		}
 		return "";
 	}

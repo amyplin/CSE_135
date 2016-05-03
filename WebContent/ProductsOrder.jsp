@@ -166,8 +166,7 @@
 
 	
 	<%
-		// update cart button
-		//String quantity = request.getParameter("quantity");
+
 
 
 	
