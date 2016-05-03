@@ -22,7 +22,10 @@
 	%>
 
 	<h1>Products</h1>
-	
+	<ul>
+		<li><a href="Categories.jsp">Categories</a></li>
+		<li><a href="Home.jsp">Home</a></li>
+	</ul>
 	<div id="categories" class="table-responsive col-xs-3">
 		<table class="table table-bordered">
 		<thead>
