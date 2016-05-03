@@ -61,61 +61,123 @@ public class CustomerDAO {
 		
 	}
 
-	
-	public static void insertCategory(CategoryBean u) {
+
+	public static boolean insertCategory(CategoryBean u, String name, String description) throws SQLException {
 		try {
 			PreparedStatement pstmt = null;
+			PreparedStatement theStatement = null;
+			conn = ConnectionProvider.getCon();
 			conn.setAutoCommit(false);
-			pstmt = conn
-					.prepareStatement("INSERT INTO categories (name, description,count) VALUES (?, ?,?)");
 
-			pstmt.setString(1, u.getName());
-			pstmt.setString(2, u.getDescription());
-			pstmt.setInt(3, 0);
+			if (name.equals("") || description.equals("")) {
+				return false;
+			} else {
 
-			int rowCount = pstmt.executeUpdate();
-			conn.commit();
-			conn.setAutoCommit(true);
+				theStatement = conn.prepareStatement("select * from categories where name = ?");
+				theStatement.setString(1, name);
+				ResultSet theResult = theStatement.executeQuery();
+
+				if (theResult.next()) {
+					return false;
+				} else {
+
+					pstmt = conn
+							.prepareStatement("INSERT INTO categories (name, description,count) VALUES (?, ?,?)");
+
+					pstmt.setString(1, u.getName());
+					pstmt.setString(2, u.getDescription());
+					pstmt.setInt(3, 0);
+
+					int rowCount = pstmt.executeUpdate();
+					conn.commit();
+					return true;
+				}
+			}
 		} catch (Exception e) {
 			System.out.println(e);
+		} finally {
+			conn.setAutoCommit(true);
+			conn.close();
 		}
-		
+		return true;
+
 	}
+
 	
-	public static void deleteCategory(CategoryBean u) {
+	public static boolean deleteCategory(CategoryBean u, String name) throws SQLException {
 		Savepoint savepoint = null;
 		try {
+			conn = ConnectionProvider.getCon();
 			PreparedStatement pstmt = null;
+			PreparedStatement theStatement = null;
 			conn.setAutoCommit(false);
+			
+			theStatement = conn.prepareStatement("select * from categories where name = ?");
+			theStatement.setString(1, name);
+			ResultSet theResult = theStatement.executeQuery();
+
+			if (!theResult.next() || theResult.getInt("count") > 0) {
+				return false;
+			}
+
 			pstmt = conn.prepareStatement("DELETE FROM categories WHERE name = ?");
 			pstmt.setString(1, u.getName());
 			int rowCount = pstmt.executeUpdate();
 			savepoint = conn.setSavepoint();
 
 			conn.commit();
-			conn.setAutoCommit(true);
+			return true;
 		} catch (Exception e) {
 			System.out.println(e);
-
+		} finally {
+			conn.setAutoCommit(true);
+			conn.close();
 		}
+		return true;
 	}
-	
-	public static void updateCategory(CategoryBean u, String origName) {
+
+	public static boolean updateCategory(CategoryBean u, String origName, String name, String description) throws SQLException {
 		try {
 			PreparedStatement pstmt = null;
+			PreparedStatement theStatement = null;
+			conn = ConnectionProvider.getCon();
 			conn.setAutoCommit(false);
-			pstmt = conn
-					.prepareStatement("UPDATE categories SET name=?, description = ? WHERE name = ?");
-			pstmt.setString(1, u.getName());
-			pstmt.setString(2, u.getDescription());
-			pstmt.setString(3, origName);
-			int rowCount = pstmt.executeUpdate();
 
-			conn.commit();
-			conn.setAutoCommit(true);
+			if (name.equals("") || description.equals("")) {
+				return false;
+			} else {
+				if (!origName.equals(name)) {  //if updating name
+					//check if category still exists
+					theStatement = conn.prepareStatement("select * from categories where name = ?");
+					theStatement.setString(1, origName);
+					ResultSet theResult = theStatement.executeQuery();
+
+					//check if name is still unique
+					theStatement = conn.prepareStatement("select * from categories where name = ?");
+					theStatement.setString(1, name);
+					ResultSet rs2 = theStatement.executeQuery();
+
+					if (!theResult.next() || rs2.next()) { //update but no longer available
+						return false;
+					}
+				} 
+				pstmt = conn
+						.prepareStatement("UPDATE categories SET name=?, description = ? WHERE name = ?");
+				pstmt.setString(1, u.getName());
+				pstmt.setString(2, u.getDescription());
+				pstmt.setString(3, origName);
+				int rowCount = pstmt.executeUpdate();
+
+				conn.commit();
+				return true;
+			}
 		} catch (Exception e) {
 			System.out.println(e);
+		} finally {
+			conn.setAutoCommit(true);
+			conn.close();
 		}
+		return true;
 	}
 	
 		public static ArrayList<String> insertProduct(ProductBean u) {
