@@ -82,7 +82,9 @@
 			</tbody>
 		</table>
 	</div>
-	<p> Shopping Cart Total: <% out.print(shoppingcarttotal); %>$</p>
+	<div align="center">
+		<p> Shopping Cart Total: <% out.print(shoppingcarttotal); %>$</p>
+	</div>
 	
 	<%					} catch  (Exception ex) {
 							System.out.println(ex);
