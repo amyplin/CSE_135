@@ -44,8 +44,11 @@
 	<h2>Categories</h2>
 	<br>
 	<ul>
-		<li><a href="Categories.jsp">Categories</a></li>
+		<li><a href="Home.jsp">Home</a></li>
 		<li><a href="products.jsp">Products</a></li>
+    	<li><a href="products_browse.jsp">Products Browse</a></li>
+    	<li><a href="ProductsOrder.jsp">Products Order</a></li>
+    	<li><a href="ShoppingCart.jsp">Shopping Cart</a></li>		
 	</ul>
 <% 
 
