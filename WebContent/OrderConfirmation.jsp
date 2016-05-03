@@ -7,7 +7,7 @@
 <link rel="stylesheet" media="screen" href="css/categories.css">
 <link rel="stylesheet" href="css/bootstrap.min.css">
 
-<title>Shopping Cart</title>
+<title>Order Confirmation</title>
 </head>
 <body>
 
@@ -23,7 +23,7 @@
 
 
  <div class="title">
-  <h1>Hello <%= session.getAttribute("username") %>, This Is Your Shopping Cart</h1>
+  <h1>Hello <%= session.getAttribute("username") %>, Order Confirmation Page</h1>
 </div>
 
 
@@ -32,9 +32,11 @@
 			<thead>
 				<tr>
 					<th>Item</th>
-					<th>Description</th>
+					<th>Category</th>
 					<th>Quantity</th>
 					<th>Price</th>
+					<th>Date Ordered</th>
+					<th>Credit Card</th>
 					
 				</tr>
 				
@@ -43,29 +45,31 @@
 			<tbody>
 				<%
 				// Create the statement
-				PreparedStatement cartSQL = conn.prepareStatement("select * from shoppingcart join products on shoppingcart.sku = products.sku where username=?");
+				PreparedStatement cartSQL = conn.prepareStatement("select * from orders where order_id = (SELECT MAX(order_id) from orders where username=?)");
 				cartSQL.setString(1, session.getAttribute("username").toString());
 				ResultSet rs = cartSQL.executeQuery();
 				%>
 				
 				<%-- Iterate over the ResultSet / Presentation code --%>
 				<%		
-						int shoppingcarttotal = 0;
+						int ordertotal = 0;
 						while (rs.next()) {
 				%>
 					<tr>
-						<td><%=rs.getString("name")%></td>
-						<td><%=rs.getString("sku")%></td>
-						<td><%=rs.getString("quantity")%></td>
-						<td><%=rs.getString("price") %>$</td>
+						<td><%=rs.getString("productname")%></td>
+						<td><%=rs.getString("productcategory")%></td>
+						<td><%=rs.getString("productquantity")%></td>
+						<td><%=rs.getString("productprice") %>$</td>
+						<td><%=rs.getString("dateordered") %></td>
+						<td><%=rs.getString("creditcard") %></td>
 					</tr>
 
 
 				<%
 							// calculate the total price
-							int quantity = Integer.parseInt(rs.getString("quantity"));
-							int price = Integer.parseInt(rs.getString("price"));
-							shoppingcarttotal += (quantity*price);
+							int quantity = Integer.parseInt(rs.getString("productquantity"));
+							int price = Integer.parseInt(rs.getString("productprice"));
+							ordertotal += (quantity*price);
 							
 						}
 						// Close the ResultSet
@@ -83,39 +87,18 @@
 		</table>
 	</div>
 	<div align="center">
-		<p> Shopping Cart Total: <% out.print(shoppingcarttotal); %>$</p>
+		<p> Order Total: <% out.print(ordertotal); %>$</p>
 	</div>
 	
 	<br>
 	<br>
 	<br>
-	<div align="center">
-	
-		<% 
-		String error = request.getParameter("error");
-		if( error == null)
-			error = "";
-		%>
-		<p> <%= error %> </p>
-	</div>
-	
-	<div style="width:200px;align:center;" align="center" >
-		<form action="ShoppingCartCheckout.jsp" method="POST">
-			<input class="form-control" id="creditcard" name="creditcard" placeholder="1234 5678 8888" >
-			<input type="hidden" name="username" value="<%out.print(session.getAttribute("username"));%>" />
-			<button type="submit" class="btn btn-default">Purchase</button>
-		</form>
-	</div>
-	
-	<br>
-	<br>
-	<br>
-	<br>
+
 <ul>
     <li><a href="Home.jsp">Home Page</a></li>
 
-    
 </ul>
+
 	
 	<%					} catch  (Exception ex) {
 							System.out.println(ex);

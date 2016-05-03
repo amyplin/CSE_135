@@ -385,12 +385,23 @@ public class CustomerDAO {
 			conn = ConnectionProvider.getCon();
 			// start transaction
 			conn.setAutoCommit(false);
-			
-			// get current date
+		
 			
 			// add to orders relation
+			PreparedStatement pstmt = conn.prepareStatement(
+			"INSERT INTO orders (order_id, username, creditcard, productname, productcategory, productprice, productquantity, dateordered)" +
+			"SELECT (SELECT coalesce (MAX(order_id) + 1, 0) FROM orders), username, ?, name, category, price, quantity, transaction_timestamp()" +
+			"FROM shoppingcart join products on shoppingcart.sku = products.sku where username = ?" );
+			
+			pstmt.setString(1, creditcard);
+			pstmt.setString(2, username);
+			pstmt.executeUpdate();
+			
 			
 			// remove from shopping cart
+			PreparedStatement rmvstmt = conn.prepareStatement("DELETE FROM shoppingcart WHERE username = ?");
+			rmvstmt.setString(1, username);
+			rmvstmt.executeUpdate();
 			
 			conn.commit();
 			conn.close();
