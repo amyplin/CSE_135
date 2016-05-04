@@ -57,7 +57,7 @@
 				
 				<%-- Iterate over the ResultSet / Presentation code --%>
 				<%		
-						int ordertotal = 0;
+						double ordertotal = 0;
 						while (rs.next()) {
 				%>
 					<tr>
@@ -72,8 +72,8 @@
 
 				<%
 							// calculate the total price
-							int quantity = Integer.parseInt(rs.getString("productquantity"));
-							int price = Integer.parseInt(rs.getString("productprice"));
+							double quantity = Double.parseDouble(rs.getString("productquantity"));
+							double price = Double.parseDouble(rs.getString("productprice"));
 							ordertotal += (quantity*price);
 							
 						}
