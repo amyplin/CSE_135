@@ -12,7 +12,16 @@
 <body>
 
 	<%@ page import="java.sql.*"%>
+	<% if (session.getAttribute("loggedIn") == null) { %>
+	<div class="title">
+		<h1>No user logged in</h1>
+	</div>
+	<% } else if (!"Owner".equals(session.getAttribute("role"))){ %>
+	<div class="title">
+		<h1>This page is available to owners only</h1>
+	</div>
 	<%
+	} else{
 		try {
 			// Registering Postgresql JDBC driver
 			Class.forName("org.postgresql.Driver");
@@ -22,10 +31,17 @@
 	%>
 
 	<h1>Products</h1>
-	<ul>
-		<li><a href="Categories.jsp">Categories</a></li>
-		<li><a href="Home.jsp">Home</a></li>
-	</ul>
+	<br>
+	<div id="categories" class="table-responsive">
+	<table class="table table-bordered">
+		<th><a href="Home.jsp">Home</a></th>
+		<th><a href="Categories.jsp">Categories</a></th>
+	    <th><a href="products_browse.jsp">Products Browse</a></th>
+	    <th><a href="ProductsOrder.jsp">Products Order</a></th>
+	    <th><a href="ShoppingCart.jsp">Shopping Cart</a></th>
+    </table>
+    </div>
+	
 	<div id="categories" class="table-responsive col-xs-3">
 		<table class="table table-bordered">
 		<thead>
@@ -107,7 +123,6 @@
 					%>
 				
 					<form action="modify_product.jsp" method="POST">
-						<input type="hidden" name="mod" value="insert"/>
 						<input type="hidden" name="ret_url" value="<%out.print(ret_url);%>" />
 						<th><input value="" id="name" name="name" size="15" /></th>
 						<th><input value="" id="sku" name="sku" size="15" /></th>
@@ -212,6 +227,7 @@ if (!(error.isEmpty())) {
 
 session.setAttribute("product_error", new ArrayList<String>());
 session.setAttribute("success_msg", new ArrayList<String>());
+	}
 %>
 </div>
 
