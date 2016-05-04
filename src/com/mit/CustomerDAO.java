@@ -182,11 +182,12 @@ public class CustomerDAO {
 		return true;
 	}
 	
-		public static ArrayList<String> insertProduct(ProductBean u) {
+	public static ArrayList<String> insertProduct(ProductBean u) throws SQLException {
 		ArrayList<String> error = new ArrayList<String>();
 		
 		try {
 			conn = ConnectionProvider.getCon();
+			conn.setAutoCommit(false);
 			
 			if (u.getName() == "" || u.getSku() == "" || u.getCategory() == "" || u.getPrice() == "") 
 				error.add("Please fill out all fields");
@@ -198,6 +199,9 @@ public class CustomerDAO {
 				ResultSet rs_sku = check_sku.executeQuery();
 				if (rs_sku.next()) 
 					error.add("SKU id taken");
+				
+				check_sku.close();
+				rs_sku.close();
 			}
 			
 			if (u.getCategory() != "") {
@@ -212,9 +216,9 @@ public class CustomerDAO {
 				rs_sku.close();
 			}
 			
-			int price = 0;
+			double price = 0.0;
 			try {
-				price = Integer.parseInt(u.getPrice());
+				price = Double.parseDouble(u.getPrice());
 				if (price < 0)
 					error.add("Invalid price");
 			} catch(Exception e) {
@@ -227,7 +231,7 @@ public class CustomerDAO {
 				pstmt.setString(1, u.getName());
 				pstmt.setString(2, u.getSku());
 				pstmt.setString(3, u.getCategory());
-				pstmt.setInt(4, price);
+				pstmt.setDouble(4, price);
 				pstmt.executeUpdate();
 				
 				pstmt = conn.prepareStatement("UPDATE categories SET count=count+1 WHERE name=?");
@@ -237,9 +241,12 @@ public class CustomerDAO {
 				pstmt.close();
 			}
 			
-			conn.close();
+			conn.commit();
 		} catch (Exception e) {
 			error.add("Insertion Failure");
+		} finally {
+			conn.setAutoCommit(true);
+			conn.close();
 		}
 		
 		return error;
