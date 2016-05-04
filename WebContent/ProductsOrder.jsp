@@ -32,6 +32,7 @@
 		Connection conn = ConnectionProvider.getCon();
 		
 		String sku = request.getParameter("sku");
+		String valid = request.getParameter("url");
 		
 		PreparedStatement newProduct = conn.prepareStatement("select * from products where sku=?");
 		newProduct.setString(1, sku);
@@ -39,12 +40,22 @@
 		
 		if(!productinfo.next())
 		{
-%>
-			 <div class="title">
-			  <h1>Sorry, this item is no longer available!</h1>
-			 </div>
-<%
-		} else
+
+			if (valid == null) {
+				%>
+				 <div class="title">
+				  <h1>Please Select A Product From The Product Browsing Page</h1>
+				 </div>
+			<%
+			} else {
+				%>
+				 <div class="title">
+				  <h1>Sorry, this item is no longer available!</h1>
+				 </div>
+				 
+	<%
+			}
+		}else
 		{
 %>
 			 <div class="title">
