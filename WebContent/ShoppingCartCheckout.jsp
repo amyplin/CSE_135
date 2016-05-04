@@ -13,8 +13,10 @@
 
 <%
 	String username = request.getParameter("username");
-	String creditcard = request.getParameter("creditcard").trim();
-	if(creditcard == "")
+	String creditcard = request.getParameter("creditcard");
+	if(creditcard != null)
+		creditcard.replaceAll("\\s","");
+	if("".equals(creditcard) )
 	{
 		response.sendRedirect("ShoppingCart.jsp?error=please%20enter%20a%20creditcard");
 	} else {

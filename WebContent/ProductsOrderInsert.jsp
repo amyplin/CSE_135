@@ -13,8 +13,10 @@
 
 <%
     String quantity = request.getParameter("quantity");
+	if(quantity != null)
+		quantity.replaceAll("\\s","");
     String sku = request.getParameter("sku");
-    if(quantity == "")
+    if("".equals(quantity) )
     {
         response.sendRedirect("ProductsOrder.jsp?sku="+ sku + "&error=please%20enter%20a%20quantity");
     } else {
