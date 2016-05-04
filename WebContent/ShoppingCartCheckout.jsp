@@ -13,10 +13,10 @@
 
 <%
 	String username = request.getParameter("username");
-	String creditcard = request.getParameter("creditcard");
+	String creditcard = request.getParameter("creditcard").trim();
 	if(creditcard == "")
 	{
-		response.sendRedirect("ShoppingCart.jsp?error=please enter a creditcard");
+		response.sendRedirect("ShoppingCart.jsp?error=please%20enter%20a%20creditcard");
 	} else {
 		String checkouterror = CustomerDAO.checkout(username, creditcard);
 		if( checkouterror != "" )
