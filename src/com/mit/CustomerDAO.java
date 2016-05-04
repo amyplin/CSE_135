@@ -183,13 +183,19 @@ public class CustomerDAO {
 		return true;
 	}
 	
-		public static ArrayList<String> insertProduct(ProductBean u) {
+	public static ArrayList<String> insertProduct(ProductBean u) throws SQLException {
 		ArrayList<String> error = new ArrayList<String>();
+		
+		String name = u.getName().replaceAll("\\s","");
+		String sku = u.getSku().replaceAll("\\s","");
+		String category = u.getCategory().replaceAll("\\s","");
+		String price = u.getPrice().replaceAll("\\s","");
 		
 		try {
 			conn = ConnectionProvider.getCon();
+			conn.setAutoCommit(false);
 			
-			if (u.getName() == "" || u.getSku() == "" || u.getCategory() == "" || u.getPrice() == "") 
+			if ("".equals(name) || "".equals(sku) || "".equals(category) || "".equals(price)) 
 				error.add("Please fill out all fields");
 				
 			if (u.getSku() != "") {
@@ -199,9 +205,12 @@ public class CustomerDAO {
 				ResultSet rs_sku = check_sku.executeQuery();
 				if (rs_sku.next()) 
 					error.add("SKU id taken");
+				
+				check_sku.close();
+				rs_sku.close();
 			}
 			
-			if (u.getCategory() != "") {
+			if (!"".equals(category)) {
 				PreparedStatement check_sku = conn.prepareStatement("SELECT * FROM categories WHERE name='"
 																	+ u.getCategory() +"'");
 			
@@ -213,10 +222,10 @@ public class CustomerDAO {
 				rs_sku.close();
 			}
 			
-			int price = 0;
+			double price_d = 0.0;
 			try {
-				price = Integer.parseInt(u.getPrice());
-				if (price < 0)
+				price_d = Double.parseDouble(price);
+				if (price_d < 0)
 					error.add("Invalid price");
 			} catch(Exception e) {
 				error.add("Invalid price");
@@ -225,22 +234,25 @@ public class CustomerDAO {
 			if (error.isEmpty()) {
 				PreparedStatement pstmt = conn.prepareStatement("INSERT INTO products (name,sku,category,price)" +
 							  									"VALUES (?,?,?,?)");
-				pstmt.setString(1, u.getName());
-				pstmt.setString(2, u.getSku());
-				pstmt.setString(3, u.getCategory());
-				pstmt.setInt(4, price);
+				pstmt.setString(1, name);
+				pstmt.setString(2, sku);
+				pstmt.setString(3, category);
+				pstmt.setDouble(4, price_d);
 				pstmt.executeUpdate();
 				
 				pstmt = conn.prepareStatement("UPDATE categories SET count=count+1 WHERE name=?");
-				pstmt.setString(1, u.getCategory());
+				pstmt.setString(1, category);
 				pstmt.executeUpdate();
 				
 				pstmt.close();
 			}
 			
-			conn.close();
+			conn.commit();
 		} catch (Exception e) {
 			error.add("Insertion Failure");
+		} finally {
+			conn.setAutoCommit(true);
+			conn.close();
 		}
 		
 		return error;
@@ -248,13 +260,19 @@ public class CustomerDAO {
 	
 	public static ArrayList<String> updateProduct(ProductBean u, String sku) {
 		ArrayList<String> error = new ArrayList<String>();
+		
+		u.setName(u.getName().replaceAll("\\s",""));
+		u.setSku(u.getSku().replaceAll("\\s",""));
+		u.setCategory(u.getCategory().replaceAll("\\s",""));
+		u.setPrice(u.getPrice().replaceAll("\\s",""));
+		
 		try {
 			conn = ConnectionProvider.getCon();
 			
-			if (u.getName() == "" || u.getSku() == "" || u.getCategory() == "" || u.getPrice() == "") 
+			if ("".equals(u.getName()) || "".equals(u.getSku()) || "".equals(u.getCategory()) || "".equals(u.getPrice())) 
 				error.add("Please fill out all fields");
 				
-			if (u.getSku() != "" && !sku.equals(u.getSku())) {
+			if (!"".equals(u.getSku()) && !sku.equals(u.getSku())) {
 				PreparedStatement check_sku = conn.prepareStatement("SELECT * FROM products WHERE sku='"
 																	+ u.getSku() +"'");
 				
@@ -263,7 +281,7 @@ public class CustomerDAO {
 					error.add("SKU id taken");
 			}
 			
-			if (u.getCategory() != "") {
+			if (!"".equals(u.getCategory())) {
 				PreparedStatement check_sku = conn.prepareStatement("SELECT * FROM categories WHERE name='"
 																	+ u.getCategory() +"'");
 			
