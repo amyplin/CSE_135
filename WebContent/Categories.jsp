@@ -86,8 +86,8 @@
 
 									if (action != null && action.equals("insert")) {
 
-										String name = request.getParameter("name");
-										String description = request.getParameter("description");
+										String name = request.getParameter("name").replaceAll("\\s","");
+										String description = request.getParameter("description").replaceAll("\\s","");
 
 										if (!CustomerDAO.insertCategory(obj, name, description)) {
 											session.setAttribute("error", "true");
@@ -109,8 +109,8 @@
 							// Check if an update is requested
 							if (action != null && action.equals("update")) {
 
-								String name = request.getParameter("name");
-								String description = request.getParameter("description");
+								String name = request.getParameter("name").replaceAll("\\s","");
+								String description = request.getParameter("description").replaceAll("\\s","");
 								String origName = request.getParameter("origName");
 
 								if (!CustomerDAO.updateCategory(obj, origName, name, description)) {
