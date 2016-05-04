@@ -10,9 +10,10 @@ public class CustomerDAO {
 		try {
 			conn = ConnectionProvider.getCon();
 			conn.setAutoCommit(false);
-			
-			if (u.getUsername().equals("") || u.getRole().equals("") || 
-					u.getAge().equals("") || u.getState().equals("")) {
+			String name = u.getUsername().replaceAll("\\s","");
+			String age = u.getAge().replaceAll("\\s","");
+			if (name.equals("") || u.getRole().equals("") || 
+					age.equals("") || u.getState().equals("")) {
 				return status;
 			} else {			
 				PreparedStatement theStatement = null;
