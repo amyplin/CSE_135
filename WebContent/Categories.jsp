@@ -149,7 +149,13 @@
 					</form>
 
 					<%
-					if (rs.getInt("count") <= 0) {
+					
+					PreparedStatement statement2 = conn.prepareStatement("select * from products where category = ?");
+					statement2.setString(1, rs.getString("name"));
+					ResultSet theResult = statement2.executeQuery();
+					
+					
+					if (!theResult.next()) {
 				%>
 					<form action="Categories.jsp" method="POST">
 						<input type="hidden" name="action" value="delete" /> <input
@@ -159,6 +165,7 @@
 				</tr>
 
 				<%
+						
 					}
 					}
 						// Close the ResultSet
