@@ -12,30 +12,32 @@
 <jsp:setProperty property="*" name="obj"/>
 
 <%
-	String quantity = request.getParameter("quantity");
-	String sku = request.getParameter("sku");
-	if(quantity == "")
-	{
-		response.sendRedirect("ProductsOrder.jsp?sku="+ sku + "&error=please enter a quantity");
-	}
+    String quantity = request.getParameter("quantity");
+    String sku = request.getParameter("sku");
+    if(quantity == "")
+    {
+        response.sendRedirect("ProductsOrder.jsp?sku="+ sku + "&error=please%20enter%20a%20quantity");
+    } else {
     try { 
         int quantity_int = Integer.parseInt(quantity);
         if( quantity_int < 1 )
         {
-    		response.sendRedirect("ProductsOrder.jsp?sku="+ sku + "&error=please enter a quantity of 1 or more");
+            response.sendRedirect("ProductsOrder.jsp?sku="+ sku + "&error=please%20enter%20a%20quantity%20of%201%20or%20more");
+        } else {
+        
+            String inserterror = CustomerDAO.addToCart(session.getAttribute("username").toString(), quantity_int, sku);
+            if( inserterror != "" )
+                response.sendRedirect("ProductsOrder.jsp?sku="+ sku + "&error=" + inserterror);
+            else
+                response.sendRedirect("products_browse.jsp");
         }
         
-        String inserterror = CustomerDAO.addToCart(session.getAttribute("username").toString(), quantity_int, sku);
-        if( inserterror != "" )
-        	response.sendRedirect("ProductsOrder.jsp?sku="+ sku + "&error=" + inserterror);
-        else
-        	response.sendRedirect("products_browse.jsp");
-        
     } catch(NumberFormatException e) { 
-		response.sendRedirect("ProductsOrder.jsp?sku="+ sku + "&error=please enter a valid number");
+        response.sendRedirect("ProductsOrder.jsp?sku="+ sku + "&error=please%20enter%20a%20valid%20number");
     } catch(Exception ex) {
-		System.out.println(ex);
-	} 
+        System.out.println(ex);
+    } 
+    }
 %>
 </body>
 </html>
