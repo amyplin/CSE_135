@@ -5,7 +5,7 @@ public class CustomerDAO {
 	static Connection conn;
 	static PreparedStatement pst;
 	
-	public static int insertCustomer(CustomerBean u) {
+	public static int insertCustomer(CustomerBean u) throws SQLException {
 		int status = 0;
 		try {
 			conn = ConnectionProvider.getCon();
@@ -30,11 +30,13 @@ public class CustomerDAO {
 				pst.setString(4, u.getState());
 				status = pst.executeUpdate();
 				conn.commit();
-				conn.setAutoCommit(true);
-				conn.close();
+			
 			}
 		} catch (Exception ex) {
 			System.out.println(ex);
+		} finally {
+			conn.setAutoCommit(true);
+			conn.close();
 		}
 		return status;
 	}

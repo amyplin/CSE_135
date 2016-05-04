@@ -11,6 +11,16 @@
 </head>
 <body>
 
+<% if (session.getAttribute("loggedIn") == null) { %>
+<div class="title">
+	<h1>No user logged in</h1>
+</div>
+<% } else { %>
+ <div class="title">
+  <h1>Hello <%= session.getAttribute("username") %></h1>
+</div>
+<%} %>
+
 	<%@ page import="java.sql.*"%>
 	<%
 		try {
