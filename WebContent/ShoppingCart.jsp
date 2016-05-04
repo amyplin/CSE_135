@@ -14,6 +14,11 @@
 <jsp:useBean id="obj" class="com.mit.CustomerBean"/>
 <jsp:setProperty property="*" name="obj"/>
 <%@ page import="java.sql.*"%>
+<% if (session.getAttribute("loggedIn") == null) { %>
+<div class="title">
+	<h1>No user logged in</h1>
+</div>
+<% } else { %>
 <%
 	try{
 		//create connections to the database
@@ -119,7 +124,8 @@
 	
 	<%					} catch  (Exception ex) {
 							System.out.println(ex);
-						} %>
+						} 
+					}%>
 						
 						
 
